@@ -1,0 +1,8 @@
+<nav class="menu-navegacao">
+    <a class="menu-marca" href="index.html">Blog de estudo Gabriel</a>
+    <ul>
+        <li ng-repeat="item in itens">
+            <a ng-href="{{item.href}}" ng-class="{ 'ativo': item.href === paginaAtual }">{{item.titulo}}</a>
+        </li>
+    </ul>
+</nav>

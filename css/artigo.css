@@ -56,6 +56,12 @@ body {
     font-size: 0.9rem;
     color: #777;
     margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.post-meta a {
+    color: #4caf50;
 }
 
 .post-image {

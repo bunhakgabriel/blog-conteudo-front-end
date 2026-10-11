@@ -2,71 +2,46 @@ import Artigo from "../../classes/Artigo.js"
 import Imagem from "../../classes/Imagem.js";
 import Topico from "../../classes/Topico.js";
 import SubTopico from "../../classes/SubTopico.js";
-import { API_URL } from "../apiConfig.js";
+import "../services/artigoService.js";
+import "../services/categoriaService.js";
+import mensagemErro from "../../utils/mensagemErro.js";
 
-// Monta o multipart esperado pela API: campo "artigo" com o JSON
-// e cada imagem como um arquivo, referenciado no JSON pelo nome do campo
-const montarFormData = (artigo) => {
-    const formData = new FormData();
-
-    const anexarImagem = (imagem, campo) => {
-        if (!imagem || !imagem.arquivo) return null;
-        formData.append(campo, imagem.arquivo);
-        return campo;
-    };
-
-    const dados = {
-        titulo: artigo.titulo,
-        conteudo: artigo.conteudo,
-        autor: artigo.autor,
-        categoria: artigo.categoria,
-        imagem: anexarImagem(artigo.imagem, 'capa'),
-        topicos: artigo.topicos.map((topico, indexTopico) => ({
-            titulo: topico.titulo,
-            conteudo: topico.conteudo,
-            imagem: anexarImagem(topico.imagem, `topico-${indexTopico}`),
-            subTopicos: topico.subTopicos
-                // subtópico de imagem sem arquivo selecionado não é enviado
-                .filter(subTopico => subTopico.tipo !== 'imagem' || (subTopico.imagem && subTopico.imagem.arquivo))
-                .map((subTopico, indexSub) => ({
-                    tipo: subTopico.tipo,
-                    texto: subTopico.tipo === 'imagem' ? null : subTopico.texto,
-                    imagem: anexarImagem(subTopico.imagem, `topico-${indexTopico}-sub-${indexSub}`)
-                }))
-        }))
-    };
-
-    formData.append('artigo', JSON.stringify(dados));
-    return formData;
-}
-
-angular.module('myApp').factory('servicePainel', ['$http', function ($http) {
-    return {
-        salvarArtigo: (artigo) => {
-            return $http.post(`${API_URL}/artigos`, montarFormData(artigo), {
-                transformRequest: angular.identity,
-                headers: { 'Content-Type': undefined } // o navegador define o multipart com o boundary
-            }).then(response => response.data);
-        }
-    }
-}]).controller('painelAdmCtrl', function ($scope, $uibModal, servicePainel) {
+// Tela de cadastro e edição de artigo. Edição: painelAdm.html?id={idArtigo}
+angular.module('myApp').controller('painelAdmCtrl', function ($scope, $uibModal, serviceArtigo, serviceCategoria) {
     $scope.vm = new Artigo();
+    $scope.categorias = [];
+    $scope.editando = false;
+    $scope.salvando = false;
+
+    const limparInputsArquivo = () => {
+        document.querySelectorAll('input[type="file"]').forEach(input => input.value = null);
+    }
 
     $scope.save = () => {
-        if (!$scope.vm.titulo || !$scope.vm.categoria) {
+        if (!$scope.vm.titulo || !$scope.vm.idCategoria) {
             alert('Informe o título e a categoria do artigo.');
             return;
         }
 
-        servicePainel.salvarArtigo($scope.vm)
-            .then(() => {
-                alert('Artigo salvo com sucesso!');
+        $scope.salvando = true;
+        serviceArtigo.salvarArtigo($scope.vm)
+            .then(resposta => {
+                alert(resposta.message);
+
+                if ($scope.editando) {
+                    window.location.href = 'artigos.html';
+                    return;
+                }
+
                 $scope.vm = new Artigo();
-                document.querySelectorAll('input[type="file"]').forEach(input => input.value = null);
+                limparInputsArquivo();
             })
             .catch(e => {
-                alert(`Falha ao salvar artigo. ${e.data && e.data.message ? e.data.message : ''}`);
+                alert(mensagemErro(e, 'Falha ao salvar artigo.'));
                 console.log('ERROR: ', e);
+            })
+            .finally(() => {
+                $scope.salvando = false;
             })
     }
 
@@ -101,6 +76,11 @@ angular.module('myApp').factory('servicePainel', ['$http', function ($http) {
         }
     }
 
+    $scope.removerTopico = (indexTopico) => {
+        if (!confirm('Remover este tópico e todo o conteúdo dele?')) return;
+        $scope.vm.topicos.splice(indexTopico, 1);
+    }
+
     $scope.removerSubTopico = (topico, indexSubTopico) => {
         const [removido] = topico.subTopicos.splice(indexSubTopico, 1);
         if (removido && removido.imagem) removido.imagem.liberar();
@@ -127,6 +107,28 @@ angular.module('myApp').factory('servicePainel', ['$http', function ($http) {
         if (item.imagem) item.imagem.liberar();
         item.imagem = null;
     }
+
+    const init = () => {
+        serviceCategoria.buscarCategorias().then(categorias => {
+            $scope.categorias = categorias;
+        }).catch(e => {
+            alert(mensagemErro(e, 'Erro ao obter as categorias.'));
+            console.log('ERROR: ', e);
+        })
+
+        const id = new URLSearchParams(window.location.search).get('id');
+        if (!id) return;
+
+        $scope.editando = true;
+        serviceArtigo.buscarArtigoId(id).then(artigo => {
+            $scope.vm = Artigo.daApi(artigo);
+        }).catch(e => {
+            alert(mensagemErro(e, 'Erro ao buscar o artigo.'));
+            console.log('ERROR: ', e);
+        })
+    }
+
+    init();
 
 }).controller('painelAdmModalCtrl', function ($scope, $uibModalInstance, modal) {
     $scope.vm = modal.vm;

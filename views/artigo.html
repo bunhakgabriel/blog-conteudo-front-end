@@ -6,16 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog do Gabriel</title>
     <link rel="stylesheet" href="../css/artigo.css">
+    <link rel="stylesheet" href="../css/menu.css">
     <script src="../angular-1.8.2/angular.js"></script>
     <script src="../node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js"></script>
     <script src="../JS/main.js"></script>
+    <script type="module" src="../JS/directives/menuNavegacao.js"></script>
     <script type="module" src="../JS/controllers/artigo.Ctrl.js"></script>
 </head>
 
 <body ng-controller="artigoCtrl">
+    <menu-navegacao></menu-navegacao>
+
     <header class="blog-header">
         <div class="container">
-            <h1>Blog de estudo Gabriel</h1>
+            <h1>{{vm.categoria.nome}}</h1>
             <p>{{vm.titulo}}</p>
         </div>
     </header>
@@ -37,7 +41,10 @@
                         ng-src="{{subTopico.imagem.url}}" alt="Imagem do artigo">
                 </div>
             </div>
-            <span>{{vm.dataPublicacao | date:'dd-MM-yyyy'}}</span>
+            <div class="post-meta">
+                <span>{{vm.dataPublicacao | date:'dd-MM-yyyy'}}</span>
+                <a ng-if="vm" ng-href="painelAdm.html?id={{vm.id}}">Editar artigo</a>
+            </div>
         </article>
     </main>
 

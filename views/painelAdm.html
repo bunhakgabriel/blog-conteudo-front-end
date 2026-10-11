@@ -5,16 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/painelAdm.css">
+    <link rel="stylesheet" href="../css/menu.css">
     <script src="../angular-1.8.2/angular.js"></script>
-    <script type="module" src="../JS/main.js"></script>
-    <script type="module" src="../JS/controllers/painelAdmCtrl.js"></script>
     <script src="../node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js"></script>
+    <script src="../JS/main.js"></script>
+    <script type="module" src="../JS/directives/menuNavegacao.js"></script>
+    <script type="module" src="../JS/controllers/painelAdmCtrl.js"></script>
     <title>Painel Administrativo - Publicação de Artigos</title>
 </head>
 
 <body ng-controller="painelAdmCtrl">
+    <menu-navegacao></menu-navegacao>
+
     <div class="container">
-        <h1>Cadastro de Artigo Blog</h1>
+        <h1>{{editando ? 'Editar Artigo' : 'Cadastro de Artigo Blog'}}</h1>
         <form>
             <label for="titulo">Título do Artigo:</label>
             <input type="text" ng-model="vm.titulo" name="titulo" placeholder="Digite o título do artigo">
@@ -24,6 +28,7 @@
 
             <div style="margin-bottom: 30px; padding: 5px; border: 0.5px solid gray;">
                 <label for="imagem">Imagem de Capa:</label>
+                <img ng-if="vm.imagem" class="miniatura" ng-src="{{vm.imagem.url}}" alt="Capa atual">
                 <input type="file" name="imagem" accept="image/*"
                     onchange="angular.element(this).scope().capturarImagem(this, 'artigo')">
                 <button type="button" class="btn-remove-img" ng-click="removerImagem(vm, $event)">Remover</button>
@@ -31,18 +36,13 @@
 
             <div>
                 <label for="categoria">Categoria:</label>
-                <select ng-model="vm.categoria" name="categoria" required>
-                    <option value="" disabled selected>Selecione uma categoria</option>
-                    <option value="JAVASCRIPT">JavaScript</option>
-                    <option value="ANGULARJS">AngularJs</option>
-                    <option value="REACTJS">ReactJs</option>
-                    <option value="REACTNATIVE">React Native</option>
-                    <option value="CSHARP">C#</option>
-                    <option value="JAVA">Java</option>
-                    <option value="TYPESCRIPT">Typescript</option>
-                    <option value="CSS">CSS</option>
-                    <option value="BOOTSTRAP">Bootstrap</option>
+                <select ng-model="vm.idCategoria" name="categoria" required
+                    ng-options="categoria.id as categoria.nome for categoria in categorias">
+                    <option value="" disabled>Selecione uma categoria</option>
                 </select>
+                <p class="dica" ng-if="categorias.length === 0">
+                    Nenhuma categoria cadastrada. <a href="categorias.html">Cadastre uma categoria</a> antes de criar o artigo.
+                </p>
             </div>
 
             <div class="topico" ng-repeat="topico in vm.topicos">
@@ -74,6 +74,7 @@
 
                 <div style="padding: 5px; border: 0.5px solid gray;">
                     <label for="imagem">Imagem:</label>
+                    <img ng-if="topico.imagem" class="miniatura" ng-src="{{topico.imagem.url}}" alt="Imagem atual">
                     <input type="file" name="imagem" accept="image/*"
                         onchange="angular.element(this).scope().capturarImagem(this, 'topico')">
                     <button type="button" class="btn-remove-img" ng-click="removerImagem(topico, $event)">Remover</button>
@@ -93,6 +94,7 @@
                     <div ng-if="subTopico.tipo === 'imagem'">
                         <div style="padding: 5px; border: 0.5px solid gray;">
                             <label for="imagem">Imagem:</label>
+                            <img ng-if="subTopico.imagem" class="miniatura" ng-src="{{subTopico.imagem.url}}" alt="Imagem atual">
                             <input type="file" name="imagem" accept="image/*"
                                 onchange="angular.element(this).scope().capturarImagem(this, 'subTopico')">
                             <button type="button" class="btn-remove-img"
@@ -103,12 +105,16 @@
                         ng-click="removerSubTopico(topico, $index)">Remover {{subTopico.tipo}}</button>
                 </div>
 
+                <button type="button" class="btn-cancel" ng-click="removerTopico($index)">Remover tópico</button>
             </div>
 
             <div class="buttons">
-                <button type="submit" ng-click="save()" class="btn-save">Salvar Artigo</button>
+                <button type="submit" ng-click="save()" class="btn-save" ng-disabled="salvando">
+                    {{salvando ? 'Salvando...' : (editando ? 'Salvar alterações' : 'Salvar Artigo')}}
+                </button>
                 <button type="button" ng-click="previa()" class="btn-save">Prévia</button>
                 <button type="button" ng-click="addItem('topico')" class="btn-save">Adicionar tópico</button>
+                <a ng-if="editando" class="btn-link" href="artigos.html">Cancelar</a>
             </div>
         </form>
     </div>

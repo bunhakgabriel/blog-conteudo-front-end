@@ -1,26 +1,37 @@
-import { API_URL } from "../apiConfig.js";
-import imagensCapa from "../../utils/objetoImagensCapa.js";
+import "../services/artigoService.js";
+import "../services/categoriaService.js";
+import mensagemErro from "../../utils/mensagemErro.js";
 
-angular.module('myApp').factory('serviceIndex', ['$http', function ($http) {
-    return {
-        buscarArtigos: (categoria) => {
-            return $http.get(`${API_URL}/artigos`, { params: { categoria } })
-                .then(response => response.data);
-        }
+angular.module('myApp').controller('indexCtrl', function ($scope, serviceArtigo, serviceCategoria) {
+    $scope.categorias = [];
+    $scope.artigos = [];
+    $scope.categoriaSelecionada = null;
+
+    $scope.buscarArtigos = (categoria) => {
+        serviceArtigo.buscarArtigos(categoria.id).then(artigos => {
+            $scope.categoriaSelecionada = categoria;
+            $scope.artigos = artigos;
+        }).catch(e => {
+            alert(mensagemErro(e, `Erro ao obter artigos de: ${categoria.nome}`));
+            console.log('ERROR: ', e);
+        })
     }
-}])
-    .controller('indexCtrl', function ($scope, serviceIndex) {
-        $scope.artigos = [];
-        $scope.capa = '';
 
-        $scope.buscarArtigos = (categoria) => {
-            serviceIndex.buscarArtigos(categoria).then(artigos => {
-                $scope.artigos = artigos;
-                $scope.capa = imagensCapa[categoria];
-            }).catch(e => {
-                alert(`Erro ao obter artigos de: ${categoria}`);
-                console.log('ERROR: ', e);
-            })
-        }
+    // Capa do card: imagem do artigo, senão a capa da categoria, senão fica o fundo neutro do css
+    $scope.estiloCapa = (artigo) => {
+        const capaCategoria = $scope.categoriaSelecionada && $scope.categoriaSelecionada.imagem;
+        const imagem = artigo.imagem || capaCategoria;
+        return imagem ? { 'background-image': `url('${imagem.url}')` } : {};
+    }
 
-    });
+    const init = () => {
+        serviceCategoria.buscarCategorias().then(categorias => {
+            $scope.categorias = categorias;
+        }).catch(e => {
+            alert(mensagemErro(e, 'Erro ao obter as categorias.'));
+            console.log('ERROR: ', e);
+        })
+    }
+
+    init();
+});

@@ -1,13 +1,7 @@
-import { API_URL } from "../apiConfig.js";
+import "../services/artigoService.js";
+import mensagemErro from "../../utils/mensagemErro.js";
 
-angular.module('myApp').factory('serviceArtigo', ['$http', function ($http) {
-    return {
-        buscarArtigoId: (id) => {
-            return $http.get(`${API_URL}/artigos/${id}`)
-                .then(response => response.data);
-        }
-    }
-}]).controller('artigoCtrl', function ($scope, serviceArtigo) {
+angular.module('myApp').controller('artigoCtrl', function ($scope, serviceArtigo) {
     $scope.vm = null;
 
     const init = () => {
@@ -19,7 +13,7 @@ angular.module('myApp').factory('serviceArtigo', ['$http', function ($http) {
                 $scope.vm = artigo;
             })
             .catch(e => {
-                alert(e.status === 404 ? 'Artigo não encontrado.' : 'Erro ao buscar o artigo.');
+                alert(mensagemErro(e, 'Erro ao buscar o artigo.'));
                 console.log('ERROR: ', e);
             })
     }
