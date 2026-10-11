@@ -9,7 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "angular-ui-bootstrap": "^2.5.0",
-    "firebase": "^11.0.2"
+    "angular-ui-bootstrap": "^2.5.0"
   }
 }

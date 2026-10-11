@@ -114,12 +114,22 @@ button {
     box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
     padding: 25px;
     margin-top: 50px;
+    max-height: 500px;
+    overflow-y: auto;
 }
 
 .icones-topico{
     margin-bottom: 20px;
-    display: flex;
-    column-gap: 10px;
+
+    div {
+        display: flex;
+        column-gap: 10px;
+        position: absolute;
+        background-color: white;
+        padding: 5px;
+        width: 66%;
+    }
+
 }
 
 .icone-topico{
@@ -162,14 +172,26 @@ button {
     }
 }
 
-.add::after{
+.addSubtitulo::after{
+    content: 'Adicionar subtitulo';
+}
+
+.addParagrafo::after{
     content: 'Adicionar paragrafo';
 }
 
+.addImagem::after{
+    content: 'Adicionar imagem';
+}
+
 .delete::after{
-    content: 'Remover paragrafo';
+    content: 'Remover item';
 }
 
 .paragrafo-topico{
     padding-block: 20px;
+}
+
+.subTopico-paragrafo {
+    height: 80px;
 }

@@ -1,23 +1,16 @@
 class Imagem {
     constructor(
-        base64 = null,
-        nome = null,
-        tamanho = null,
-        tipo = null
+        arquivo = null
     ){
-        this.base64 = base64;
-        this.nome = nome;
-        this.tamanho = tamanho;
-        this.tipo = tipo;
+        this.arquivo = arquivo; // File que será enviado para a API
+        this.url = arquivo ? URL.createObjectURL(arquivo) : null; // url local para a prévia
+        this.nome = arquivo ? arquivo.name : null;
+        this.tamanho = arquivo ? arquivo.size : null;
+        this.tipo = arquivo ? arquivo.type : null;
     }
 
-    toJSON() {
-        return {
-            base64: this.base64,
-            nome: this.nome,
-            tamanho: this.tamanho,
-            tipo: this.tipo
-        };
+    liberar() {
+        if (this.url) URL.revokeObjectURL(this.url);
     }
 }
 

@@ -38,13 +38,13 @@
 
         <main class="content" ng-if="artigos.length > 0">
             <section class="post" ng-repeat="artigo in artigos">
-                <div class="post-image" ng-style="{'background-image': 'url(' + capa + ')'}"></div>
+                <div class="post-image" ng-style="{'background-image': 'url(' + (artigo.imagem ? artigo.imagem.url : capa) + ')'}"></div>
                 <div class="post-info">
                     <p class="category">{{artigo.categoria}}</p>
-                    <p class="date">Data publicação: {{artigo.dataPublicacao}}</p>
+                    <p class="date">Data publicação: {{artigo.dataPublicacao | date:'dd-MM-yyyy'}}</p>
                     <h3>{{artigo.titulo}}</h3>
                     <!-- <p>Aprenda a como remover todos caracteres especiais...</p> -->
-                    <a ng-href="artigo.html?id={{artigo.id}}&categoria={{artigo.categoria}}" class="read-more">Ler mais
+                    <a ng-href="artigo.html?id={{artigo.id}}" class="read-more">Ler mais
                         →</a>
                 </div>
             </section>
