@@ -1,2 +1,5 @@
-node_modules/
-angular-1.8.2/
+node_modules/*
+!node_modules/angular-ui-bootstrap/
+angular-1.8.2/docs/
+angular-1.8.2/i18n/
+angular-1.8.2/test-bundles/
