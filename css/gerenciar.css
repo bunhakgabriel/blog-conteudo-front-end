@@ -1,0 +1,105 @@
+/* Telas de gerenciamento (artigos.html e categorias.html), usadas junto com o painelAdm.css */
+.container-largo {
+    max-width: 1000px;
+}
+
+.cabecalho-tela {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.cabecalho-tela h1 {
+    margin-bottom: 0;
+}
+
+.filtros {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.filtros label {
+    margin: 0 0 15px;
+}
+
+.filtros select {
+    max-width: 300px;
+}
+
+.form-categoria {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.form-categoria h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.tabela {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabela th,
+.tabela td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #e5e5e5;
+    vertical-align: middle;
+}
+
+.tabela th {
+    background-color: #f0f0f0;
+    font-size: 14px;
+    text-transform: uppercase;
+    color: #555;
+}
+
+.tabela tbody tr:hover {
+    background-color: #fafafa;
+}
+
+.coluna-acoes {
+    text-align: right !important;
+    white-space: nowrap;
+}
+
+.miniatura-tabela {
+    width: 64px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+    display: block;
+}
+
+.sem-imagem {
+    color: #aaa;
+}
+
+.btn-acao {
+    display: inline-block;
+    padding: 6px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.btn-secundario {
+    background-color: #e0e0e0;
+    color: #333;
+}
+
+.btn-secundario:hover {
+    background-color: #d0d0d0;
+}
+
+.mensagem-vazia {
+    text-align: center;
+    color: #777;
+    padding: 30px 0;
+}

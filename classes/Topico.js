@@ -1,23 +1,14 @@
 class Topico {
     constructor(
-        subtitulo = null,
+        titulo = null,
         conteudo = null,
         imagem = null,
-        paragrafos = []
+        subTopicos = []
     ){
-        this.subtitulo = subtitulo;
+        this.titulo = titulo;
         this.conteudo = conteudo;
         this.imagem = imagem;
-        this.paragrafos = paragrafos;
-    }
-
-    toJSON() {
-        return {
-            subtitulo: this.subtitulo,
-            conteudo: this.conteudo,
-            imagem: this.imagem ? this.imagem.toJSON() : null, // Caso imagem seja um objeto, chamamos o toJSON nela também
-            paragrafos: this.paragrafos
-        };
+        this.subTopicos = subTopicos;
     }
 }
 

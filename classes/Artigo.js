@@ -1,36 +1,44 @@
+import Imagem from "./Imagem.js";
+import Topico from "./Topico.js";
+import SubTopico from "./SubTopico.js";
+
 class Artigo {
     constructor(
         id = null,
         titulo = null,
         conteudo = null,
         autor = 'Gabriel de Camargo Bunhak',
-        dataPublicacao = new Date(),
         imagem = null,
-        categoria = null,
+        idCategoria = null,
         topicos = []
     ){
         this.id = id;
         this.titulo = titulo;
         this.conteudo = conteudo;
         this.autor = autor;
-        this.dataPublicacao = dataPublicacao;
         this.imagem = imagem;
-        this.categoria = categoria;
+        this.idCategoria = idCategoria;
         this.topicos = topicos;
     }
 
-    // Método toJSON para converter a instância em um objeto literal
-    toJSON() {
-        return {
-            id: this.id,
-            titulo: this.titulo,
-            conteudo: this.conteudo,
-            autor: this.autor,
-            dataPublicacao: this.dataPublicacao,
-            imagem: this.imagem,
-            categoria: this.categoria,
-            topicos: this.topicos
-        };
+    // Converte o artigo retornado pela API para edição no painel
+    static daApi(artigoApi) {
+        const topicos = artigoApi.topicos.map(topico => new Topico(
+            topico.titulo,
+            topico.conteudo,
+            Imagem.daApi(topico.imagem),
+            topico.subTopicos.map(subTopico => new SubTopico(subTopico.tipo, subTopico.texto, Imagem.daApi(subTopico.imagem)))
+        ));
+
+        return new Artigo(
+            artigoApi.id,
+            artigoApi.titulo,
+            artigoApi.conteudo,
+            artigoApi.autor,
+            Imagem.daApi(artigoApi.imagem),
+            artigoApi.categoria.id,
+            topicos
+        );
     }
 }
 

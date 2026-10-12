@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/painelAdm.css">
+    <link rel="stylesheet" href="../css/gerenciar.css">
+    <link rel="stylesheet" href="../css/menu.css">
+    <script src="../angular-1.8.2/angular.js"></script>
+    <script src="../node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js"></script>
+    <script src="../JS/main.js"></script>
+    <script type="module" src="../JS/directives/menuNavegacao.js"></script>
+    <script type="module" src="../JS/controllers/artigosCtrl.js"></script>
+    <title>Artigos - Blog de estudo Gabriel</title>
+</head>
+
+<body ng-controller="artigosCtrl">
+    <menu-navegacao></menu-navegacao>
+
+    <div class="container container-largo">
+        <div class="cabecalho-tela">
+            <h1>Artigos</h1>
+            <a class="btn-save btn-acao" href="painelAdm.html">+ Novo artigo</a>
+        </div>
+
+        <div class="filtros">
+            <label for="filtroCategoria">Categoria:</label>
+            <select id="filtroCategoria" ng-model="filtro.idCategoria" ng-change="buscarArtigos()"
+                ng-options="categoria.id as categoria.nome for categoria in categorias">
+                <option value="">Todas</option>
+            </select>
+        </div>
+
+        <p class="mensagem-vazia" ng-if="carregando">Carregando...</p>
+        <p class="mensagem-vazia" ng-if="!carregando && artigos.length === 0">Nenhum artigo encontrado.</p>
+
+        <table class="tabela" ng-if="!carregando && artigos.length > 0">
+            <thead>
+                <tr>
+                    <th>Capa</th>
+                    <th>Título</th>
+                    <th>Categoria</th>
+                    <th>Publicação</th>
+                    <th class="coluna-acoes">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="artigo in artigos">
+                    <td>
+                        <img ng-if="artigo.imagem" class="miniatura-tabela" ng-src="{{artigo.imagem.url}}" alt="">
+                        <span ng-if="!artigo.imagem" class="sem-imagem">—</span>
+                    </td>
+                    <td>{{artigo.titulo}}</td>
+                    <td>{{artigo.categoria.nome}}</td>
+                    <td>{{artigo.dataPublicacao | date:'dd-MM-yyyy'}}</td>
+                    <td class="coluna-acoes">
+                        <a class="btn-acao btn-secundario" ng-href="artigo.html?id={{artigo.id}}">Ver</a>
+                        <a class="btn-acao btn-save" ng-href="painelAdm.html?id={{artigo.id}}">Editar</a>
+                        <button type="button" class="btn-acao btn-cancel" ng-click="excluirArtigo(artigo)">Excluir</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>

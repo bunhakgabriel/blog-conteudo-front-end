@@ -6,16 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog do Gabriel</title>
     <link rel="stylesheet" href="../css/artigo.css">
+    <link rel="stylesheet" href="../css/menu.css">
     <script src="../angular-1.8.2/angular.js"></script>
     <script src="../node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js"></script>
     <script src="../JS/main.js"></script>
+    <script type="module" src="../JS/directives/menuNavegacao.js"></script>
     <script type="module" src="../JS/controllers/artigo.Ctrl.js"></script>
 </head>
 
 <body ng-controller="artigoCtrl">
+    <menu-navegacao></menu-navegacao>
+
     <header class="blog-header">
         <div class="container">
-            <h1>Blog de estudo Gabriel</h1>
+            <h1>{{vm.categoria.nome}}</h1>
             <p>{{vm.titulo}}</p>
         </div>
     </header>
@@ -24,17 +28,23 @@
         <article class="blog-post">
             <h2 class="post-title">{{vm.titulo}}</h2>
             <p>{{vm.conteudo}}</p>
-            <img ng-show="vm.imagem" class="post-image" ng-src="{{vm.imagem.base64}}" alt="Imagem do artigo">
+            <img ng-show="vm.imagem" class="post-image" ng-src="{{vm.imagem.url}}" alt="Imagem do artigo">
             <div ng-repeat="topico in vm.topicos">
-                <h3 style="font-size: 1.2rem;" class="post-title">{{topico.subtitulo}}</h3>
+                <h3 style="font-size: 1.2rem;" class="post-title">{{topico.titulo}}</h3>
                 <p>{{topico.conteudo}}</p>
-                <img ng-show="topico.imagem" class="post-image" ng-src="{{topico.imagem.base64}}"
+                <img ng-show="topico.imagem" class="post-image" ng-src="{{topico.imagem.url}}"
                     alt="Imagem do artigo">
-                <p ng-repeat="paragrafo in topico.paragrafos track by $index">
-                    {{paragrafo.texto}}
-                </p>
+                <div ng-repeat="subTopico in topico.subTopicos">
+                    <h4 ng-if="subTopico.tipo === 'subtitulo'">{{subTopico.texto}}</h4>
+                    <p ng-if="subTopico.tipo === 'paragrafo'">{{subTopico.texto}}</p>
+                    <img ng-if="subTopico.tipo === 'imagem' && subTopico.imagem" class="post-image"
+                        ng-src="{{subTopico.imagem.url}}" alt="Imagem do artigo">
+                </div>
             </div>
-            <span>{{vm.dataPublicacao}}</span>
+            <div class="post-meta">
+                <span>{{vm.dataPublicacao | date:'dd-MM-yyyy'}}</span>
+                <a ng-if="vm" ng-href="painelAdm.html?id={{vm.id}}">Editar artigo</a>
+            </div>
         </article>
     </main>
 

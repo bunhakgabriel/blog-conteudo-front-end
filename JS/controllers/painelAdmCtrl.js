@@ -1,66 +1,47 @@
 import Artigo from "../../classes/Artigo.js"
 import Imagem from "../../classes/Imagem.js";
 import Topico from "../../classes/Topico.js";
-import { converterImagemBase64 } from "../../utils/converterImgBase64.js";
-import { db } from "../firebaseConfig.js";
-import {
-    getFirestore,
-    getDocs,
-    collection,
-    addDoc,
-    setDoc,
-    updateDoc,
-    doc,
-    getDoc
-} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+import SubTopico from "../../classes/SubTopico.js";
+import "../services/artigoService.js";
+import "../services/categoriaService.js";
+import mensagemErro from "../../utils/mensagemErro.js";
 
-angular.module('myApp').factory('servicePainel', ['$http', function ($http) {
-    return {
-        salvarArtigo: async (data) => {
-            try {
-                const docRef = doc(db, 'identificador', 'uc0E1y6Rtxce46SrQrNk');
-                const docSnap = await getDoc(docRef);
-                const identificadorAtual = docSnap.data().id;
-                await updateDoc(docRef, { id: identificadorAtual + 1 });
-                
-                data.id = identificadorAtual;
-                const colecaoRef = doc(db, data.categoria, data.id.toString());
-                await setDoc(colecaoRef, data);
-                return true;
-            } catch (e) {
-                console.log(e);
-                return false;
-            }
-        }
-    }
-}]).controller('painelAdmCtrl', function ($scope, $uibModal, servicePainel) {
+// Tela de cadastro e edição de artigo. Edição: painelAdm.html?id={idArtigo}
+angular.module('myApp').controller('painelAdmCtrl', function ($scope, $uibModal, serviceArtigo, serviceCategoria) {
     $scope.vm = new Artigo();
+    $scope.categorias = [];
+    $scope.editando = false;
+    $scope.salvando = false;
 
-    $scope.save = async () => {
-        const data = $scope.vm;
+    const limparInputsArquivo = () => {
+        document.querySelectorAll('input[type="file"]').forEach(input => input.value = null);
+    }
 
-        const dataConverted = data instanceof Artigo ? data.toJSON() : data;
-        if (dataConverted.imagem instanceof Imagem) {
-            dataConverted.imagem = dataConverted.imagem.toJSON();
-        }
-        if (dataConverted.topicos && Array.isArray(dataConverted.topicos)) {
-            dataConverted.topicos = dataConverted.topicos.map(topico => {
-                if (topico instanceof Topico) {
-                    return topico.toJSON();
-                }
-                return topico;
-            });
+    $scope.save = () => {
+        if (!$scope.vm.titulo || !$scope.vm.idCategoria) {
+            alert('Informe o título e a categoria do artigo.');
+            return;
         }
 
-        await servicePainel.salvarArtigo(dataConverted)
-            .then((result) => {
-                if(result){
-                    alert('Artigo salvo com sucesso!');
-                    $scope.vm = new Artigo();
-                    $scope.$apply();
-                } else {
-                    alert('Falha ao salvar artigo.');
+        $scope.salvando = true;
+        serviceArtigo.salvarArtigo($scope.vm)
+            .then(resposta => {
+                alert(resposta.message);
+
+                if ($scope.editando) {
+                    window.location.href = 'artigos.html';
+                    return;
                 }
+
+                $scope.vm = new Artigo();
+                limparInputsArquivo();
+            })
+            .catch(e => {
+                alert(mensagemErro(e, 'Falha ao salvar artigo.'));
+                console.log('ERROR: ', e);
+            })
+            .finally(() => {
+                $scope.salvando = false;
             })
     }
 
@@ -84,40 +65,70 @@ angular.module('myApp').factory('servicePainel', ['$http', function ($http) {
         if (item === 'topico') {
             $scope.vm.topicos.push(new Topico());
         }
-        else if (item === 'paragrafo') {
-            $scope.vm.topicos[index].paragrafos.push({ texto: "" });
+        else if (item === 'subtitulo' || item === 'paragrafo' || item === 'imagem') {
+            $scope.vm.topicos[index].subTopicos.push(new SubTopico(item));
         }
     }
 
     $scope.removeItem = (item, index) => {
         if (item === 'paragrafo') {
-            $scope.vm.topicos[index].paragrafos.pop();
+            $scope.vm.topicos[index].subTopicos.pop();
         }
     }
 
-    $scope.capturarImagem = async function (input, action, index) {
-        let file = input.files[0];
-        let base64 = await converterImagemBase64(file)
-        let imagem = new Imagem(base64, file.name, file.size, file.type)
-
-        if (action === 'artigo') {
-            $scope.vm.imagem = imagem;
-        } else {
-            let index = $scope.vm.topicos.length
-            $scope.vm.topicos[index - 1].imagem = imagem;
-        }
+    $scope.removerTopico = (indexTopico) => {
+        if (!confirm('Remover este tópico e todo o conteúdo dele?')) return;
+        $scope.vm.topicos.splice(indexTopico, 1);
     }
 
-    $scope.removerImagem = (action, event, index) => {
-        let inputElement = event.target.closest('div').querySelector('input[type="file"]');
+    $scope.removerSubTopico = (topico, indexSubTopico) => {
+        const [removido] = topico.subTopicos.splice(indexSubTopico, 1);
+        if (removido && removido.imagem) removido.imagem.liberar();
+    }
+
+    // Chamado pelo onchange do input, o scope do input já tem o item (vm, topico ou subTopico) do ng-repeat
+    $scope.capturarImagem = function (input, action) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const scopeInput = angular.element(input).scope();
+        const item = { artigo: $scope.vm, topico: scopeInput.topico, subTopico: scopeInput.subTopico }[action];
+
+        $scope.$apply(() => {
+            if (item.imagem) item.imagem.liberar();
+            item.imagem = new Imagem(file);
+        });
+    }
+
+    $scope.removerImagem = (item, event) => {
+        const inputElement = event.target.closest('div').querySelector('input[type="file"]');
         angular.element(inputElement).val(null);
 
-        if (action === 'artigo') {
-            $scope.vm.imagem = undefined;
-        } else {
-            $scope.vm.topicos[index].imagem = undefined
-        }
+        if (item.imagem) item.imagem.liberar();
+        item.imagem = null;
     }
+
+    const init = () => {
+        serviceCategoria.buscarCategorias().then(categorias => {
+            $scope.categorias = categorias;
+        }).catch(e => {
+            alert(mensagemErro(e, 'Erro ao obter as categorias.'));
+            console.log('ERROR: ', e);
+        })
+
+        const id = new URLSearchParams(window.location.search).get('id');
+        if (!id) return;
+
+        $scope.editando = true;
+        serviceArtigo.buscarArtigoId(id).then(artigo => {
+            $scope.vm = Artigo.daApi(artigo);
+        }).catch(e => {
+            alert(mensagemErro(e, 'Erro ao buscar o artigo.'));
+            console.log('ERROR: ', e);
+        })
+    }
+
+    init();
 
 }).controller('painelAdmModalCtrl', function ($scope, $uibModalInstance, modal) {
     $scope.vm = modal.vm;
@@ -126,4 +137,3 @@ angular.module('myApp').factory('servicePainel', ['$http', function ($http) {
         $uibModalInstance.close();
     }
 });
-

@@ -5,16 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/painelAdm.css">
+    <link rel="stylesheet" href="../css/menu.css">
     <script src="../angular-1.8.2/angular.js"></script>
-    <script type="module" src="../JS/main.js"></script>
-    <script type="module" src="../JS/controllers/painelAdmCtrl.js"></script>
     <script src="../node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js"></script>
+    <script src="../JS/main.js"></script>
+    <script type="module" src="../JS/directives/menuNavegacao.js"></script>
+    <script type="module" src="../JS/controllers/painelAdmCtrl.js"></script>
     <title>Painel Administrativo - Publicação de Artigos</title>
 </head>
 
 <body ng-controller="painelAdmCtrl">
+    <menu-navegacao></menu-navegacao>
+
     <div class="container">
-        <h1>Cadastro de Artigo Blog</h1>
+        <h1>{{editando ? 'Editar Artigo' : 'Cadastro de Artigo Blog'}}</h1>
         <form>
             <label for="titulo">Título do Artigo:</label>
             <input type="text" ng-model="vm.titulo" name="titulo" placeholder="Digite o título do artigo">
@@ -24,36 +28,45 @@
 
             <div style="margin-bottom: 30px; padding: 5px; border: 0.5px solid gray;">
                 <label for="imagem">Imagem de Capa:</label>
+                <img ng-if="vm.imagem" class="miniatura" ng-src="{{vm.imagem.url}}" alt="Capa atual">
                 <input type="file" name="imagem" accept="image/*"
                     onchange="angular.element(this).scope().capturarImagem(this, 'artigo')">
-                <button class="btn-remove-img" ng-click="removerImagem('artigo', $event)">Remover</button>
+                <button type="button" class="btn-remove-img" ng-click="removerImagem(vm, $event)">Remover</button>
             </div>
 
             <div>
                 <label for="categoria">Categoria:</label>
-                <select ng-model="vm.categoria" name="categoria" required>
-                    <option value="" disabled selected>Selecione uma categoria</option>
-                    <option value="JAVASCRIPT">JavaScript</option>
-                    <option value="ANGULARJS">AngularJs</option>
-                    <option value="REACTJS">ReactJs</option>
-                    <option value="REACTNATIVE">React Native</option>
-                    <option value="CSHARP">C#</option>
-                    <option value="JAVA">Java</option>
-                    <option value="TYPESCRIPT">Typescript</option>
+                <select ng-model="vm.idCategoria" name="categoria" required
+                    ng-options="categoria.id as categoria.nome for categoria in categorias">
+                    <option value="" disabled>Selecione uma categoria</option>
                 </select>
+                <p class="dica" ng-if="categorias.length === 0">
+                    Nenhuma categoria cadastrada. <a href="categorias.html">Cadastre uma categoria</a> antes de criar o artigo.
+                </p>
             </div>
 
             <div class="topico" ng-repeat="topico in vm.topicos">
                 <div class="icones-topico">
-                    <span ng-click="addItem('paragrafo', $index)" class="icone-topico add">
-                        <img src="../icones-lucide/add.svg" alt="">
-                    </span>
-                    <span ng-click="removeItem('paragrafo', $index)" class="icone-topico delete">
-                        <img src="../icones-lucide/delete.svg" alt="">
-                    </span>
+                    <div>
+                        <span ng-click="addItem('subtitulo', $index)" class="icone-topico addSubtitulo">
+                            <img src="../icones-lucide/subtitulo.svg" alt="">
+                        </span>
+                        <span ng-click="addItem('paragrafo', $index)" class="icone-topico addParagrafo">
+                            <img src="../icones-lucide/add.svg" alt="">
+                        </span>
+                        <span ng-click="addItem('imagem', $index)" class="icone-topico addImagem">
+                            <img src="../icones-lucide/camera.svg" alt="">
+                        </span>
+                        <span ng-click="removeItem('paragrafo', $index)" class="icone-topico delete">
+                            <img src="../icones-lucide/delete.svg" alt="">
+                        </span>
+                    </div>
                 </div>
-                <label for="titulo">Título do tópico:</label>
-                <input type="text" ng-model="topico.subtitulo" name="titulo" placeholder="Digite o título do tópico">
+
+                <div style="margin-top: 50px;">
+                    <label for="titulo">Título do tópico:</label>
+                    <input type="text" ng-model="topico.titulo" name="titulo" placeholder="Digite o título do tópico">
+                </div>
 
                 <label for="conteudo">Conteúdo do tópico:</label>
                 <textarea ng-model="topico.conteudo" name="conteudo"
@@ -61,24 +74,47 @@
 
                 <div style="padding: 5px; border: 0.5px solid gray;">
                     <label for="imagem">Imagem:</label>
+                    <img ng-if="topico.imagem" class="miniatura" ng-src="{{topico.imagem.url}}" alt="Imagem atual">
                     <input type="file" name="imagem" accept="image/*"
                         onchange="angular.element(this).scope().capturarImagem(this, 'topico')">
-                    <button class="btn-remove-img" ng-click="removerImagem('topico', $event, $index)">Remover</button>
+                    <button type="button" class="btn-remove-img" ng-click="removerImagem(topico, $event)">Remover</button>
                 </div>
 
-                <div class="paragrafo-topico" ng-repeat="paragrafo in topico.paragrafos track by $index">
-                    <label for="conteudo">Parágrafo {{$index + 1}}</label>
-                    <textarea ng-model="paragrafo.texto" name="conteudo"
-                        placeholder="Digite o conteúdo do paragrafo"></textarea>
+                <div class="paragrafo-topico" ng-repeat="subTopico in topico.subTopicos track by $index">
+                    <div ng-if="subTopico.tipo === 'subtitulo'">
+                        <label for="subtitulo">Subtitulo</label>
+                        <input type="text" ng-model="subTopico.texto" name="subtitulo"
+                            placeholder="Digite o subtitulo" />
+                    </div>
+                    <div ng-if="subTopico.tipo === 'paragrafo'">
+                        <label for="conteudo">Parágrafo</label>
+                        <textarea class="subTopico-paragrafo" ng-model="subTopico.texto" name="conteudo"
+                            placeholder="Digite o conteúdo do paragrafo"></textarea>
+                    </div>
+                    <div ng-if="subTopico.tipo === 'imagem'">
+                        <div style="padding: 5px; border: 0.5px solid gray;">
+                            <label for="imagem">Imagem:</label>
+                            <img ng-if="subTopico.imagem" class="miniatura" ng-src="{{subTopico.imagem.url}}" alt="Imagem atual">
+                            <input type="file" name="imagem" accept="image/*"
+                                onchange="angular.element(this).scope().capturarImagem(this, 'subTopico')">
+                            <button type="button" class="btn-remove-img"
+                                ng-click="removerImagem(subTopico, $event)">Remover imagem</button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-remove-img"
+                        ng-click="removerSubTopico(topico, $index)">Remover {{subTopico.tipo}}</button>
                 </div>
 
+                <button type="button" class="btn-cancel" ng-click="removerTopico($index)">Remover tópico</button>
             </div>
 
             <div class="buttons">
-                <button type="submit" ng-click="save()" class="btn-save">Salvar Artigo</button>
+                <button type="submit" ng-click="save()" class="btn-save" ng-disabled="salvando">
+                    {{salvando ? 'Salvando...' : (editando ? 'Salvar alterações' : 'Salvar Artigo')}}
+                </button>
                 <button type="button" ng-click="previa()" class="btn-save">Prévia</button>
                 <button type="button" ng-click="addItem('topico')" class="btn-save">Adicionar tópico</button>
-                <button type="button" class="btn-cancel">Cancelar</button>
+                <a ng-if="editando" class="btn-link" href="artigos.html">Cancelar</a>
             </div>
         </form>
     </div>

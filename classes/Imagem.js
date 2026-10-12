@@ -1,23 +1,26 @@
 class Imagem {
     constructor(
-        base64 = null,
-        nome = null,
-        tamanho = null,
-        tipo = null
+        arquivo = null
     ){
-        this.base64 = base64;
-        this.nome = nome;
-        this.tamanho = tamanho;
-        this.tipo = tipo;
+        this.id = null; // preenchido quando a imagem já está salva na API (edição)
+        this.arquivo = arquivo; // File que será enviado para a API
+        this.url = arquivo ? URL.createObjectURL(arquivo) : null; // url local para a prévia
+        this.nome = arquivo ? arquivo.name : null;
+        this.tamanho = arquivo ? arquivo.size : null;
+        this.tipo = arquivo ? arquivo.type : null;
     }
 
-    toJSON() {
-        return {
-            base64: this.base64,
-            nome: this.nome,
-            tamanho: this.tamanho,
-            tipo: this.tipo
-        };
+    // Imagem que veio da API ({ id, url, nome, tipo, tamanho })
+    static daApi(imagemApi) {
+        if (!imagemApi) return null;
+
+        const imagem = new Imagem();
+        Object.assign(imagem, imagemApi);
+        return imagem;
+    }
+
+    liberar() {
+        if (this.arquivo && this.url) URL.revokeObjectURL(this.url);
     }
 }
 

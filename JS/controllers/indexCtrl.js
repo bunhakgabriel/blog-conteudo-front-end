@@ -1,56 +1,37 @@
-import { db } from "../firebaseConfig.js";
-import {
-    getFirestore,
-    getDocs,
-    collection,
-    addDoc,
-    setDoc,
-    updateDoc,
-    doc,
-    getDoc
-} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+import "../services/artigoService.js";
+import "../services/categoriaService.js";
+import mensagemErro from "../../utils/mensagemErro.js";
 
-import imagensCapa from "../../utils/objetoImagensCapa.js";
-import converterDataFirebase from "../../utils/converterDataFirebase.js";
+angular.module('myApp').controller('indexCtrl', function ($scope, serviceArtigo, serviceCategoria) {
+    $scope.categorias = [];
+    $scope.artigos = [];
+    $scope.categoriaSelecionada = null;
 
-angular.module('myApp').factory('serviceIndex', ['$http', function ($http) {
-    return {
-        buscarArtigos: async (colecao) => {
-            try {
-                const collectionRef = collection(db, colecao);
-                const querySnapshot = await getDocs(collectionRef);
-
-                const documents = querySnapshot.docs.map(doc => {
-                    const data = doc.data();
-                    data.dataPublicacao = converterDataFirebase(data.dataPublicacao);
-
-                    return {
-                        ...data
-                    };
-                });
-
-                return documents;
-            } catch (e) {
-                console.log(e);
-                return false;
-            }
-        }
+    $scope.buscarArtigos = (categoria) => {
+        serviceArtigo.buscarArtigos(categoria.id).then(artigos => {
+            $scope.categoriaSelecionada = categoria;
+            $scope.artigos = artigos;
+        }).catch(e => {
+            alert(mensagemErro(e, `Erro ao obter artigos de: ${categoria.nome}`));
+            console.log('ERROR: ', e);
+        })
     }
-}])
-    .controller('indexCtrl', function ($scope, serviceIndex) {
-        $scope.artigos = [];
-        $scope.capa = '';
 
-        $scope.buscarArtigos = async (colecao) => {
-            await serviceIndex.buscarArtigos(colecao).then(response => {
-                $scope.artigos = response;
-                $scope.capa = imagensCapa[colecao];
-                console.log(response)
-                $scope.$apply();
-            }).catch(e => {
-                alert('Erro ao obter artigos de: ', colecao);
-                console.log('ERROR: ', e);
-            })
-        }
+    // Capa do card: imagem do artigo, senão a capa da categoria, senão fica o fundo neutro do css
+    $scope.estiloCapa = (artigo) => {
+        const capaCategoria = $scope.categoriaSelecionada && $scope.categoriaSelecionada.imagem;
+        const imagem = artigo.imagem || capaCategoria;
+        return imagem ? { 'background-image': `url('${imagem.url}')` } : {};
+    }
 
-    });
+    const init = () => {
+        serviceCategoria.buscarCategorias().then(categorias => {
+            $scope.categorias = categorias;
+        }).catch(e => {
+            alert(mensagemErro(e, 'Erro ao obter as categorias.'));
+            console.log('ERROR: ', e);
+        })
+    }
+
+    init();
+});

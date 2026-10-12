@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/painelAdm.css">
+    <link rel="stylesheet" href="../css/gerenciar.css">
+    <link rel="stylesheet" href="../css/menu.css">
+    <script src="../angular-1.8.2/angular.js"></script>
+    <script src="../node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js"></script>
+    <script src="../JS/main.js"></script>
+    <script type="module" src="../JS/directives/menuNavegacao.js"></script>
+    <script type="module" src="../JS/controllers/categoriasCtrl.js"></script>
+    <title>Categorias - Blog de estudo Gabriel</title>
+</head>
+
+<body ng-controller="categoriasCtrl">
+    <menu-navegacao></menu-navegacao>
+
+    <div class="container container-largo">
+        <h1>Categorias</h1>
+
+        <form class="form-categoria" ng-submit="criarCategoria()">
+            <h2>Nova categoria</h2>
+
+            <label for="nomeCategoria">Nome:</label>
+            <input type="text" id="nomeCategoria" ng-model="nova.nome" maxlength="60" placeholder="Ex: Node.js">
+
+            <div style="padding: 5px; border: 0.5px solid gray;">
+                <label for="capaCategoria">Imagem de capa (opcional):</label>
+                <img ng-if="nova.capa" class="miniatura" ng-src="{{nova.capa.url}}" alt="Prévia da capa">
+                <input type="file" id="capaCategoria" accept="image/*"
+                    onchange="angular.element(this).scope().capturarCapa(this)">
+                <button type="button" class="btn-remove-img" ng-if="nova.capa" ng-click="removerCapa()">Remover</button>
+            </div>
+
+            <div class="buttons">
+                <button type="submit" class="btn-save" ng-disabled="salvando">
+                    {{salvando ? 'Cadastrando...' : 'Cadastrar categoria'}}
+                </button>
+            </div>
+        </form>
+
+        <p class="mensagem-vazia" ng-if="categorias.length === 0">Nenhuma categoria cadastrada.</p>
+
+        <table class="tabela" ng-if="categorias.length > 0">
+            <thead>
+                <tr>
+                    <th>Capa</th>
+                    <th>Nome</th>
+                    <th>Artigos</th>
+                    <th class="coluna-acoes">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="categoria in categorias">
+                    <td>
+                        <img ng-if="categoria.imagem" class="miniatura-tabela" ng-src="{{categoria.imagem.url}}" alt="">
+                        <span ng-if="!categoria.imagem" class="sem-imagem">—</span>
+                    </td>
+                    <td>{{categoria.nome}}</td>
+                    <td>{{categoria.qtdArtigos}}</td>
+                    <td class="coluna-acoes">
+                        <button type="button" class="btn-acao btn-cancel" ng-click="excluirCategoria(categoria)"
+                            ng-disabled="categoria.qtdArtigos > 0"
+                            title="{{categoria.qtdArtigos > 0 ? 'Mova ou exclua os artigos desta categoria antes de excluí-la' : 'Excluir categoria'}}">
+                            Excluir
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,55 @@
+/* Menu de navegação compartilhado por todas as telas (views/partials/menu.html) */
+menu-navegacao {
+    display: block;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.menu-navegacao {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 24px;
+    background-color: #1e1e1e;
+    border-bottom: 2px solid #4caf50;
+    font-family: Arial, sans-serif;
+}
+
+.menu-navegacao .menu-marca {
+    color: #f4f4f4;
+    font-size: 20px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.menu-navegacao ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.menu-navegacao li a {
+    display: block;
+    padding: 6px 14px;
+    border-radius: 4px;
+    color: #ccc;
+    font-size: 15px;
+    text-decoration: none;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.menu-navegacao li a:hover {
+    background-color: #2a2a2a;
+    color: #fff;
+}
+
+.menu-navegacao li a.ativo {
+    background-color: #4caf50;
+    color: #fff;
+}

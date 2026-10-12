@@ -5,14 +5,16 @@
         <div class="blog-post">
             <h2 class="post-title">{{vm.titulo}}</h2>
             <p>{{vm.conteudo}}</p>
-            <img ng-show="vm.imagem" class="post-image" ng-src="{{vm.imagem.base64}}" alt="Imagem do artigo">
+            <img ng-show="vm.imagem" class="post-image" ng-src="{{vm.imagem.url}}" alt="Imagem do artigo">
             <div ng-repeat="topico in vm.topicos">
-                <h3 style="font-size: 1.2rem;" class="post-title">{{topico.subtitulo}}</h3>
+                <h3 style="font-size: 1.2rem;" class="post-title">{{topico.titulo}}</h3>
                 <p>{{topico.conteudo}}</p>
-                <img ng-show="topico.imagem" class="post-image" ng-src="{{topico.imagem.base64}}" alt="Imagem do artigo">
-                <p ng-repeat="paragrafo in topico.paragrafos track by $index">
-                    {{paragrafo.texto}}
-                </p>
+                <img ng-show="topico.imagem" class="post-image" ng-src="{{topico.imagem.url}}" alt="Imagem do artigo">
+                <div ng-repeat="subTopico in topico.subTopicos track by $index">
+                    <h4 ng-if="subTopico.tipo === 'subtitulo'">{{subTopico.texto}}</h4>
+                    <p ng-if="subTopico.tipo === 'paragrafo'">{{subTopico.texto}}</p>
+                    <img ng-show="subTopico.imagem" class="post-image" ng-src="{{subTopico.imagem.url}}" alt="Imagem do artigo">
+                </div>
             </div>
         </div>
     </section>

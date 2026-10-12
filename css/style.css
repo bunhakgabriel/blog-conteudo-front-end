@@ -11,24 +11,10 @@ body {
   line-height: 1.6;
 }
 
-header {
-  background-color: #1e1e1e;
-  padding: 10px 20px;
-  text-align: center;
-  position: fixed;
-  width: 100%;
-}
-
-.header-container h1 {
-  color: #f4f4f4;
-  font-size: 24px;
-}
-
 /* Layout principal */
 .container {
   display: flex;
   padding: 20px;
-  padding-top: 80px;
 }
 
 /* Barra lateral */
@@ -65,6 +51,21 @@ header {
   cursor: pointer;
 }
 
+.sidebar li.selecionada {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.sidebar .sem-categorias {
+  font-size: 14px;
+  color: #ccc;
+}
+
+.sidebar .sem-categorias a,
+.boas-vindas .link-destaque {
+  color: #4caf50;
+}
+
 /* Conteúdo principal */
 .content {
   flex: 1;
@@ -86,6 +87,7 @@ header {
   background-position: center;
   border-radius: 8px;
   margin-right: 20px;
+  background-color: #2a2a2a; /* fundo neutro quando não há capa */
 }
 
 .post-info {
